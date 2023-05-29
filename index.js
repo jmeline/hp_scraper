@@ -15,14 +15,12 @@ const getBooks = async authorUrl => {
   return $('h2.title-post > a').map((_, book) => $(book).attr("href"))
 }
 
+const getAllAudioLinks = async url => {
   const $ = await getLoadedCheerioHtml(url)
-  const books = $('h2.title-post > a')
-  const bookUrls = []
-  for (const book of books) {
-    const url = book.attribs.href
-    bookUrls.push(url)
-  }
-  return bookUrls
+  const links = $('div.pgntn-page-pagination-block > a')
+    .map((_, book) => $(book).attr("href"))
+  // const firstLink = links[0].replace(/\d\//, '')
+  return [url, ...new Set(links)]
 }
 
 const jimDaleAudioBooks = await getBooks("https://hpaudiobooks.co/series/hp-jim-dale/")
@@ -32,7 +30,6 @@ console.log(jimDaleAudioBooks)
 console.log(stephenFryAudioBooks)
 
 // get audio links
-
 const getAudioAndChapter = async url => {
   console.log(`url: ${url}`)
   const $ = await getLoadedCheerioHtml(url)
