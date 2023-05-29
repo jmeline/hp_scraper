@@ -5,11 +5,9 @@ const site = "https://hpaudiobooks.co"
 console.log(site)
 
 // obtain all harry potter audio books
-// const books = $('div.pt-cv-ifield > a.pt-cv-href-thumbnail')
 const getLoadedCheerioHtml = async url => {
   const response = await axios.get(url)
-  const html = response.data
-  return cheerio.load(html)
+  return cheerio.load(response.data)
 }
 
 const getBooks = async url => {
