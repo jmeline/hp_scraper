@@ -46,3 +46,11 @@ const getAudioAndChapter = async url => {
 
 const results = await getAudioAndChapter(jimDaleAudioBooks[0])
 
+console.log(await getAllAudioLinks(jimDaleAudioBooks[0]))
+console.log(await getAllAudioLinks(jimDaleAudioBooks[1]))
+console.log(await getAllAudioLinks(jimDaleAudioBooks[2]))
+console.log(await getAllAudioLinks(jimDaleAudioBooks[3]))
+console.log(await getAllAudioLinks(jimDaleAudioBooks[4]))
+console.log(await getAllAudioLinks(jimDaleAudioBooks[5]))
+console.log(await getAllAudioLinks(jimDaleAudioBooks[6]))
+
