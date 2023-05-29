@@ -10,7 +10,11 @@ const getLoadedCheerioHtml = async url => {
   return cheerio.load(response.data)
 }
 
-const getBooks = async url => {
+const getBooks = async authorUrl => {
+  const $ = await getLoadedCheerioHtml(authorUrl)
+  return $('h2.title-post > a').map((_, book) => $(book).attr("href"))
+}
+
   const $ = await getLoadedCheerioHtml(url)
   const books = $('h2.title-post > a')
   const bookUrls = []
