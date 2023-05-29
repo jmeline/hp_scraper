@@ -34,16 +34,13 @@ const getAudioAndChapter = async url => {
   console.log(`url: ${url}`)
   const $ = await getLoadedCheerioHtml(url)
 
-  const pages = $('a.post-page-numbers:contains("Next")')
-  console.log(`next url: ${pages[0].attribs.href}`)
-  const items = $('div.post-single > ')
-  const chapters = $('p em')
-  const audios = $('audio')
-  for (const chapter of chapters) {
-    console.log(chapter.children[0].data)
-  }
+  // const chapters = $('p em')
+  // for (const chapter of chapters) {
+  //   console.log(chapter.children[0].data)
+  // }
+  const audios = $('audio source')
   for (const audio of audios) {
-    console.log(audio.children[0].attribs.src)
+    console.log($(audio).attr('src'))
   }
 }
 
