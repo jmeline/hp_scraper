@@ -1,32 +1,32 @@
 import * as cheerio from 'cheerio'
 import axios from 'axios'
-import fs from 'fs'
-import Path from 'path'
+import * as fs from 'fs'
+import * as path from 'path'
 
 const site = "https://hpaudiobooks.co"
 console.log(site)
 
 // obtain all harry potter audio books
-const getLoadedCheerioHtml = async url => {
+const getLoadedCheerioHtml = async (url: string) => {
   const response = await axios.get(url)
   return cheerio.load(response.data)
 }
 
-const getBooks = async authorUrl => {
+const getBooks = async (authorUrl:string) => {
   const $ = await getLoadedCheerioHtml(authorUrl)
   return $('h2.title-post > a').map((_, book) => $(book).attr("href"))
 }
 
-const getAllPaginationLinks = async url => {
+const getAllPaginationLinks = async (url:string) => {
   const $ = await getLoadedCheerioHtml(url)
   const links = $('div.pgntn-page-pagination-block > a')
     .map((_, book) => $(book).attr("href"))
   return [url, ...new Set(links)]
 }
 
-const downloadAudio = async (audioUrl, filename) => {
+const downloadAudio = async (audioUrl: string, filename: string) => {
   console.log(`Downloading audio as "${filename}"`);
-  return new Promise(async (resolve, reject) => {
+  return new Promise<void>(async (resolve, reject) => {
     const fileStream = fs.createWriteStream(filename);
 
     const response = await axios({
@@ -48,14 +48,14 @@ const downloadAudio = async (audioUrl, filename) => {
   });
 };
 
-const getAllAudioLinks = async (url, directory) => {
+const getAllAudioLinks = async function(url: string, directory: string) {
   if (!fs.existsSync(directory)) {
     fs.mkdirSync(directory)
     console.log(`Created ${directory}`)
   }
   const audioLinks = await getAllPaginationLinks(url)
   console.log("Grabbing all audioLinks: ", audioLinks)
-  const allResponses = await Promise.all(audioLinks.map(axios.get))
+  const allResponses = await Promise.all(audioLinks.map(link => axios.get(link)))
   console.log("Finished grabbing all audioLinks: ", allResponses.length)
 
   const allAudioLinks = []
@@ -68,9 +68,9 @@ const getAllAudioLinks = async (url, directory) => {
       if (match) {
         filename = match[1].replace(/%20/g, "_")
       }
-      const path = Path.resolve(directory, filename)
-      console.log(`AudioLink: '${audioLink}', path: '${path}'`)
-      allAudioLinks.push(downloadAudio(audioLink, path))
+      const localPath = path.resolve(directory, filename)
+      console.log(`AudioLink: '${audioLink}', path: '${localPath}'`)
+      allAudioLinks.push(downloadAudio(audioLink, localPath))
     })
   }
   await Promise.all(allAudioLinks)
