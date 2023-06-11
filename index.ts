@@ -3,7 +3,9 @@ import axios from 'axios'
 import * as fs from 'fs'
 import * as path from 'path'
 import chalk from 'chalk'
+import axiosRetry from 'axios-retry'
 
+axiosRetry(axios, { retryDelay: axiosRetry.exponentialDelay})
 
 const site = "https://hpaudiobooks.co"
 console.log(site)
