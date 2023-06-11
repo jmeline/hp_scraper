@@ -3,8 +3,10 @@ import axios from 'axios'
 import * as fs from 'fs'
 import * as path from 'path'
 
+
 const site = "https://hpaudiobooks.co"
 console.log(site)
+
 
 // obtain all harry potter audio books
 const getLoadedCheerioHtml = async (url: string) => {
@@ -25,25 +27,37 @@ const getAllPaginationLinks = async (url:string) => {
 }
 
 const downloadAudio = async (audioUrl: string, filename: string) => {
-  console.log(`Downloading audio as "${filename}"`);
+  console.log(`Downloading audio "${filename}" from "${audioUrl}"`);
   return new Promise<void>(async (resolve, reject) => {
     const fileStream = fs.createWriteStream(filename);
 
+    // Make a GET request to download the audio file
+    // https.get(audioUrl, (response) => {
+    //     // Pipe the response data to the write stream
+    //     response.pipe(fileStream);
+    //
+    //     // Handle the end event when the download is complete
+    //     fileStream.on('finish', () => {
+    //         console.log(`Audio downloaded successfully as "${filename}"`);
+    //         fileStream.close();
+    //     });
+    //
     const response = await axios({
-      method: "GET",
-      url: audioUrl,
-      responseType: 'stream'
+        method: "get",
+        url: audioUrl,
+        responseType: 'stream'
     })
 
     response.data.pipe(fileStream)
     fileStream.on('finish', () => {
-      console.log(`Audio downloaded successfully as "${filename}"`);
-      fileStream.close();
-      resolve();
+        console.log(`audio downloaded successfully as "${filename}"`);
+        fileStream.close();
+        resolve();
     });
 
     fileStream.on('error', (error) => {
-      reject(error);
+        console.log(error)
+        reject(error);
     });
   });
 };
@@ -62,14 +76,15 @@ const getAllAudioLinks = async function(url: string, directory: string) {
   for (const response of allResponses) {
     const $ = cheerio.load(response.data)
     $('audio source').each((index, audio) => {
-      const audioLink = $(audio).attr('src')
-      const match = audioLink.match(/\/([^\/]+\.mp3)/)
-      let filename = `audio_${index + 1}.mp3`
+      const audioLink: string = $(audio).attr('src').replace(/\?_=\d+/, "")
+      const match: RegExpMatchArray = audioLink.match(/\/([^\/]+\.mp3)/)
+      let filename: string = `audio_${index + 1}.mp3`
       if (match) {
         filename = match[1].replace(/%20/g, "_")
       }
-      const localPath = path.resolve(directory, filename)
-      console.log(`AudioLink: '${audioLink}', path: '${localPath}'`)
+      const localPath: string = path.resolve(directory, filename)
+      const localPathRelativePath: string = path.relative(directory, filename)
+      console.log(`AudioLink: '${audioLink}', path: '${localPathRelativePath}'`)
       allAudioLinks.push(downloadAudio(audioLink, localPath))
     })
   }
@@ -78,15 +93,41 @@ const getAllAudioLinks = async function(url: string, directory: string) {
 }
 
 const jimDaleAudioBooks = await getBooks("https://hpaudiobooks.co/series/hp-jim-dale/")
-const stephenFryAudioBooks = await getBooks("https://hpaudiobooks.co/series/stephen/")
+const stephenFryAudioBooks: cheerio.Cheerio<string> = await getBooks("https://hpaudiobooks.co/series/stephen/")
 
-console.log(jimDaleAudioBooks)
+// console.log(jimDaleAudioBooks)
 // console.log(stephenFryAudioBooks)
 
-await getAllAudioLinks(jimDaleAudioBooks[0], "hp_1_the_sorcerers_stone")
-await getAllAudioLinks(jimDaleAudioBooks[1], "hp_2_the_chamber_of_secrets")
-await getAllAudioLinks(jimDaleAudioBooks[2], "hp_3_the_prisoner_of_azkaban")
-await getAllAudioLinks(jimDaleAudioBooks[3], "hp_4_the_goblet_of_fire")
-await getAllAudioLinks(jimDaleAudioBooks[4], "hp_5_the_order_of_the_phoenix")
-await getAllAudioLinks(jimDaleAudioBooks[5], "hp_6_the_half_blood_prince")
-await getAllAudioLinks(jimDaleAudioBooks[6], "hp_7_the_deathly_hollows")
+
+const GetBook = async function(audiobooks: cheerio.Cheerio<string>, path: string) {
+    const bookTitles: string[] = [
+     "hp_1_the_sorcerers_stone",
+     "hp_2_the_chamber_of_secrets",
+     "hp_3_the_prisoner_of_azkaban",
+     "hp_4_the_goblet_of_fire",
+     "hp_5_the_order_of_the_phoenix",
+     "hp_6_the_half_blood_prince",
+     "hp_7_the_deathly_hollows"
+    ]
+    if (!fs.existsSync(path)) {
+        fs.mkdirSync(path)
+        console.log(`Created ${path}`)
+    }
+
+    const promises = []
+    for (var i = 0; i < audiobooks.length; i++) {
+        promises.push(getAllAudioLinks(audiobooks[i], `${path}/${bookTitles[i]}`))
+    }
+    await Promise.all(promises)
+}
+
+await GetBook(jimDaleAudioBooks, "JimDale")
+await GetBook(stephenFryAudioBooks, "StephenFry")
+
+// await getAllAudioLinks(jimDaleAudioBooks[0], "hp_1_the_sorcerers_stone")
+// await getAllAudioLinks(jimDaleAudioBooks[1], "hp_2_the_chamber_of_secrets")
+// await getAllAudioLinks(jimDaleAudioBooks[2], "hp_3_the_prisoner_of_azkaban")
+// await getAllAudioLinks(jimDaleAudioBooks[3], "hp_4_the_goblet_of_fire")
+// await getAllAudioLinks(jimDaleAudioBooks[4], "hp_5_the_order_of_the_phoenix")
+// await getAllAudioLinks(jimDaleAudioBooks[5], "hp_6_the_half_blood_prince")
+// await getAllAudioLinks(jimDaleAudioBooks[6], "hp_7_the_deathly_hollows")
