@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio'
 import axios from 'axios'
 import * as fs from 'fs'
 import * as path from 'path'
+import chalk from 'chalk'
 
 
 const site = "https://hpaudiobooks.co"
@@ -27,7 +28,7 @@ const getAllPaginationLinks = async (url:string) => {
 }
 
 const downloadAudio = async (audioUrl: string, filename: string) => {
-  console.log(`Downloading audio "${filename}" from "${audioUrl}"`);
+  console.log(`Downloading audio "${chalk.green(filename)}" from "${chalk.red(audioUrl)}"`);
   return new Promise<void>(async (resolve, reject) => {
     const fileStream = fs.createWriteStream(filename);
 
@@ -50,7 +51,7 @@ const downloadAudio = async (audioUrl: string, filename: string) => {
 
     response.data.pipe(fileStream)
     fileStream.on('finish', () => {
-        console.log(`audio downloaded successfully as "${filename}"`);
+        console.log(`Finished downloading: ${chalk.magenta(filename)}`);
         fileStream.close();
         resolve();
     });
@@ -83,8 +84,6 @@ const getAllAudioLinks = async function(url: string, directory: string) {
         filename = match[1].replace(/%20/g, "_")
       }
       const localPath: string = path.resolve(directory, filename)
-      const localPathRelativePath: string = path.relative(directory, filename)
-      console.log(`AudioLink: '${audioLink}', path: '${localPathRelativePath}'`)
       allAudioLinks.push(downloadAudio(audioLink, localPath))
     })
   }
@@ -97,7 +96,6 @@ const stephenFryAudioBooks: cheerio.Cheerio<string> = await getBooks("https://hp
 
 // console.log(jimDaleAudioBooks)
 // console.log(stephenFryAudioBooks)
-
 
 const GetBook = async function(audiobooks: cheerio.Cheerio<string>, path: string) {
     const bookTitles: string[] = [

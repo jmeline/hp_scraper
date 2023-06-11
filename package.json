@@ -18,6 +18,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@types/node": "^20.2.5"
+    "@types/node": "^20.2.5",
+    "chalk": "^5.2.0"
   }
 }
