@@ -10,7 +10,6 @@ axiosRetry(axios, { retryDelay: axiosRetry.exponentialDelay})
 const site = "https://hpaudiobooks.co"
 console.log(site)
 
-
 // obtain all harry potter audio books
 const getLoadedCheerioHtml = async (url: string) => {
   const response = await axios.get(url)
@@ -93,11 +92,10 @@ const getAllAudioLinks = async function(url: string, directory: string) {
   return allAudioLinks
 }
 
-const jimDaleAudioBooks = await getBooks("https://hpaudiobooks.co/series/hp-jim-dale/")
-const stephenFryAudioBooks: cheerio.Cheerio<string> = await getBooks("https://hpaudiobooks.co/series/stephen/")
-
-// console.log(jimDaleAudioBooks)
-// console.log(stephenFryAudioBooks)
+const jimDaleAudioBooks: cheerio.Cheerio<string> =
+    await getBooks("https://hpaudiobooks.co/series/hp-jim-dale/")
+const stephenFryAudioBooks: cheerio.Cheerio<string> =
+    await getBooks("https://hpaudiobooks.co/series/stephen/")
 
 const GetBook = async function(audiobooks: cheerio.Cheerio<string>, path: string) {
     const bookTitles: string[] = [
@@ -123,11 +121,3 @@ const GetBook = async function(audiobooks: cheerio.Cheerio<string>, path: string
 
 await GetBook(jimDaleAudioBooks, "JimDale")
 await GetBook(stephenFryAudioBooks, "StephenFry")
-
-// await getAllAudioLinks(jimDaleAudioBooks[0], "hp_1_the_sorcerers_stone")
-// await getAllAudioLinks(jimDaleAudioBooks[1], "hp_2_the_chamber_of_secrets")
-// await getAllAudioLinks(jimDaleAudioBooks[2], "hp_3_the_prisoner_of_azkaban")
-// await getAllAudioLinks(jimDaleAudioBooks[3], "hp_4_the_goblet_of_fire")
-// await getAllAudioLinks(jimDaleAudioBooks[4], "hp_5_the_order_of_the_phoenix")
-// await getAllAudioLinks(jimDaleAudioBooks[5], "hp_6_the_half_blood_prince")
-// await getAllAudioLinks(jimDaleAudioBooks[6], "hp_7_the_deathly_hollows")
